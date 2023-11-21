@@ -1,0 +1,164 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : CSlide
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x1a70265500514903
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  type_code : 10
+  p_codes :
+   -
+     internal_properties : CAAAAAgAAAAX3pbjG+/BqrmbIE70qxoSABBdSDDPWfkTfu79eP8JoUxZiCybuhIzKRmpqfyoz+U7IKrNWm8hlizfv269cqVOzAATwt6I+CIbjzpUPelXFagk5k7jTlk2e404N60h7ZGkfbVmE6bhRIlnQ19n/De5i/xJy9jq06uZfxpxxyLhmJMmQ3J1z98kbI1bumwKUA==
+     code : |1+
+      CSlide is Class
+      	inhérits of CElement
+      	
+      	
+      GLOBAL
+      	CONSTANT 
+      		
+      		//Relative path of a slide .xml in the PPTX archive
+      		//The slide.xml files are named slide1.xml, slide2.xml.. 
+      		CST_RelativeSlidePath = "ppt\slides\slide%1.xml" 	
+      		CST_NameXMLDoc = "XMLDoc_Slide%1"
+      		
+      	END
+      END
+      
+     type : 131072
+  procedures :
+   -
+     name : Constructor
+     internal_properties : CAAAAAgAAAAaLOqnyZZdWBbPJOTUxK5TJEiV/K8VYeQhxN576yUAVLChHcZ2tTNf1yk7jHFO3JZlDPx5P1hxAwJsm7bZ/Hwmi8lF5ZBJTH3VygiM3k0twxVHfh4dVFCcx5idOrE4NdMAgvpgxN3IROFI/b3gej4a8pWaLZLj+2H/WAXC2QZz88uaWQFd0D3Xidr2ZjDRWNg6I9KLuw==
+     procedure_id : 1905064788897188099
+     type_code : 27
+     code : |1+
+      PROCEDURE Constructor(clDocPPTX, nNumber)
+      
+      //Builds the relative path of the XML file of the slide that will be extracted from the archive (PPTX)
+      //StringBuild(CST_RelativeSlidePath, nNumber)
+      
+      //Builds a name of XML document to handle the XML code in memory
+      //StringBuild(CST_NameXMLDoc, nNumber)
+      
+      Constructor CElement(clDocPPTX, StringBuild(CST_RelativeSlidePath, nNumber), nNumber, StringBuild(CST_NameXMLDoc, nNumber))
+      
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 1905064788897253635
+     type_code : 28
+     code : |1+
+      PROCEDURE Destructor()
+      
+     type : 655360
+   -
+     name : FillTitle
+     internal_properties : CAAAAAgAAACln96wOQYtXhfrfWM7PqMH0bwO9I9EbMTX6mHJKNGKSDJCmJYFBdCAtnyGQ30xgYGCd0o11UQT52Q0gVWRxzXqVYxmKA7Q5Xwgy0i084RhHUsKI2jmXasJ+CrQITXk9XGSw+6pvCF4U17iaBSMpFig7CgapHT7L4QMcM5z2eKbHvxAAHvu6bvmi3EUCW28N0UxVDiQUaGTJVpYAtrwt/Bh9Kq8RAuTv/i8Wx02VnP/lq16lg==
+     procedure_id : 1905099956093466520
+     type_code : 12
+     code : |1+
+      // Summary: Defines the title of the slide
+      // Syntax:
+      //FillTitle (<sCaption>, <sName>)
+      //
+      // Parameters:
+      //	sCaption: Title that must be given to the slide
+      //	sName: Name of the title to change, the one that is specified in the XML 
+      // Return value:
+      // 	None
+      
+      PROCEDURE FillTitle(sCaption, sName)
+      
+      
+      //Search for the title in the XML code
+      sXPathQuery is string = StringBuild("//p:sp[p:nvSpPr/p:cNvPr/@name='%1']" + "/p:txBody/a:p/a:endParaRPr", sName)
+      XMLExecuteXPath(m_sNameXMLDoc, sXPathQuery)
+      
+      
+      IF XMLFound(m_sNameXMLDoc) THEN
+      	
+      	//Adds the "<a:r>" tag before "<a:endParaRPr.."
+      	// and positions onto it to add the "<a:t> tag in child with the caption of the title 
+      	XMLInsertElement(m_sNameXMLDoc,"a:r","",XMLPreviousElement,True)
+      	
+      	sCaption = StringToUTF8(sCaption)
+      	XMLAddChild(m_sNameXMLDoc,"a:t",sCaption)
+      END
+      
+      //Browse completed, end the search
+      XMLCancelSearch(m_sNameXMLDoc)
+     type : 458752
+   -
+     name : FillArray
+     internal_properties : CAAAAAgAAABMYxGTujchEjegIUiOSskm5Uwd/EEyoNqR/Je2X5HOzD78CC5BRA+VjD0McTLxo3VnKCBqFLr5tLZvLIam9GLeHcTd8ZrkbpqTYJpVYWJ3vdzOb3LN4aSXlmnfBEcl90LKna8CTGws+1wd1V1iTaIjJvhn68buzQ6Ub9NWtQsx14BIKYLACDZ3ddwj+elrtbI1qlObCahfzU3ybLVsWhd3xr7Btg==
+     procedure_id : 1905428834625363565
+     type_code : 12
+     code : |1+
+      // Summary: Fills an array 
+      // Syntax:
+      //FillArray (<arrData>, <sName>)
+      //
+      // Parameters:
+      // 	arrData: Array of data to include in the PowerPoint array
+      // 	sName: Name of the PowerPoint array as it appears in the XML of the slide 
+      // Return value:
+      // 	None
+      
+      PROCEDURE FillArray(arrData, sName)
+      
+      sXPathQuery is string
+      sCaption is string 
+      
+      //Finds the row and the column that correspond in the XML code
+      sXPathQuery = StringBuild("//p:graphicFrame[p:nvGraphicFramePr/p:cNvPr/@name='%1']" +
+      "/a:graphic/a:graphicData/a:tbl/a:tr/a:tc/a:txBody/a:p/a:endParaRPr", sName)
+      
+      XMLExecuteXPath(m_sNameXMLDoc,sXPathQuery)
+      
+      sXMLPosition is string 
+      nRowPosition is int
+      nColumnPosition is int
+      i, j are int
+      WHILE XMLFound(m_sNameXMLDoc)	
+      	
+      	sXMLPosition = XMLPath(m_sNameXMLDoc)
+      	nRowPosition= Position(sXMLPosition, "a:tr")
+      	i = Val (Middle(sXMLPosition,nRowPosition+5,1) )
+      	nColumnPosition= Position(sXMLPosition, "a:tc")
+      	j = Val(Middle(sXMLPosition,nColumnPosition+5,1) )
+      	IF i<0 OR j<0 OR  ArrayInfo(arrData, tiDimension, 1) < i OR ArrayInfo(arrData, tiDimension, 2) < j THEN
+      		XMLNext(m_sNameXMLDoc)
+      		//No data for this row and column to include in the XML
+      		CONTINUE
+      	END
+      	
+      	// Adds the "<a:r>" tag before "<a:endParaRPr.."
+      	// and positions onto it to add the "<a:t> tag in child with the text of the row and column
+      	XMLInsertElement(m_sNameXMLDoc,"a:r","",XMLPreviousElement,True)
+      	
+      	sCaption = StringToUTF8(arrData[i][j])
+      	XMLAddChild(m_sNameXMLDoc,"a:t",sCaption)	
+      	
+      	XMLNext(m_sNameXMLDoc)
+      END
+      
+      
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : CClasse1
+resources :
+ string_res :
+  identifier : 0x1a702632004bbe90
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

@@ -1,0 +1,267 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : CDocumentPPTX
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x1a70265900545949
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  type_code : 10
+  p_codes :
+   -
+     code : |1+
+      CDocumentPPTX is Class
+      	
+      	m_sFilePath is string // Path of the PPTX template file 
+      	
+      	m_sListFiles is string //List of files found in .PPTX
+      	m_nNbSlides is int
+      	m_nNbCharts is int
+      END
+      
+     type : 131072
+  procedures :
+   -
+     name : Constructor
+     internal_properties : CAAAAAgAAAC7FKRwn1RBN8iPYCF+p5RwC6Of0WSGXwRkx9MQR7DDAtnQ6u31NTnsBN9CUD+TQkH/xfV/5emzpe3Z7eRbCoJPe0oPbBftgeOj1mzJ62sctZOzLjfdcU1vA/FYrVVAtRqkxNhVLBwHL3E9bOpi7gNy6/2gpKt1eUeHyas6uPAuYOGWYzFN2ER2gvXTkFe+EhaZrMrTSiatqpnTu82FbKCerw==
+     procedure_id : 1905064806077258057
+     type_code : 27
+     code : |1+
+      // Automatic process of errors: RETURN FALSE
+      //
+      
+      PROCEDURE Constructor(sFilePath)
+      
+      sPathGeneratedFile is string = fExtractPath(sFilePath,fDrive+fDirectory+fFileName)+"_Generated" +
+      fExtractPath(sFilePath, fExtension)
+      
+      fCopyFile(sFilePath, sPathGeneratedFile)
+      
+      m_sFilePath = sPathGeneratedFile
+      
+      //Wait while the copy is performed
+      Multitask(-1)
+      
+      //Retrieves the list of files found in .PPTX
+      ListPPTXFiles()
+      
+      //Retrieves the number of slides found in .PPTX
+      NbSlides()
+      
+      //Retrieves the number of charts found in .PPTX
+      NbCharts()
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 1905064806077323593
+     type_code : 28
+     code : |1+
+      PROCEDURE Destructor()
+      
+     type : 655360
+   -
+     name : DefineSlideTitle
+     internal_properties : CAAAAAgAAAA1uACuileJncYDxzEuARkTOXUv9iHV+3ZiyFZqkoRerVqsIXw2zVtpdDphHeXHIAzAzV0C/9nmPEvrqoRRjfI3edMlBpbDP2bxAMK2nHLn+vGBzPmyAtQqLYup/45NhCwsBTwiuR+VUieOJj350VUNj6Yem27UJzfL5h05Ql1VQi5ueFkx8gJ+njg3ywuq9XoUg4U5CGvIvML3XTIVG/3LOtfXSRGEGT/34QY9kcSmnaqNzLf+cpwkYuA8QX9iaWToFPJOcSuXTJw4wal74uYQWkclcuf3YFgOwzetubsKKQ==
+     procedure_id : 1905067735245242624
+     type_code : 12
+     code : |1+
+      // Summary: Used to fill a slide N of the PPTX document from the content of WINDEV controls
+      // Syntax:
+      //DefineSlidetitle (<nSlideNumber>, <sTitle>, <sName>)
+      //
+      // Parameters:
+      //	nSlideNumber: Number of the slide whose content must be filled
+      //	sTitle: Title that must be given
+      //	sName: Name of the title as it is in the PPTX template to fill
+      // Return value:
+      // 	None
+      // Automatic process of errors: RETURN FALSE
+      //
+      
+      PROCEDURE DefineSlideTitle(nSlideNumber, LOCAL sTitle, sName)
+      
+      //No need to continue if the number passed in parameter is not valid
+      IF nSlideNumber < 0 OR nSlideNumber > m_nNbSlides THEN
+      	Error("The number of the slide to modify passed in parameter is not valid.",
+      	StringBuild("%1 slides are found in the selected PowerPoint template.", m_nNbSlides) )
+      	RETURN
+      END
+      
+      //Create a new Slide object 
+      clNewSlide is CSlide(object, nSlideNumber)
+      
+      //Write into the slide
+      clNewSlide.FillTitle(sTitle, sName)
+      
+      clNewSlide.Write()
+     type : 458752
+   -
+     name : ListPPTXFiles
+     procedure_id : 1905130665111737110
+     type_code : 12
+     code : |1+
+      // Summary: List all the files found in PPTX
+      // Syntax:
+      //ListPPTXFiles ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      
+      PROCEDURE ListPPTXFiles()
+      
+      sArchiveName is string = "Archive"
+      
+      //Opening the archive
+      zipOpen(sArchiveName,m_sFilePath)
+      
+      //Retrieve the list of all the files found in PPTX
+      m_sListFiles = zipListFile(sArchiveName)
+      
+      END :
+      //Close the archive
+      zipClose(sArchiveName)
+     type : 458752
+   -
+     name : NbSlides
+     internal_properties : CAAAAAgAAACxCVOvz3cQLxwppcKvTzRMOu2lYThvN6IR1Kj7Rr9HRE7DJ2XpqHNYaArHm5lX4m1LOuriIb7xc54Wta3bbB083IzO6fPU0SCTqJIaRmrxVnuEHZj1uWjbChVzusuh17LUl9FArEwWpZrHdfHewXoLMKqFP7DEp2hy8dN8sccv6rVtimOb5SeuvGu6GrYZUFDop7tK
+     procedure_id : 1905131597119725862
+     type_code : 12
+     code : |1+
+      // Summary: Defines the number of slides found in .PPTX
+      // Syntax:
+      //NbSlides ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      
+      PROCEDURE NbSlides()
+      
+      nNbSlides is int 
+      
+      FOR EACH string sFile of m_sListFiles SEPARATED BY CR
+      	IF Upper(sFile) [= "PPT\SLIDES\SLIDE" _AND_ Upper(fExtractPath(sFile, fExtension)) =".XML" THEN
+      		nNbSlides++		
+      	END
+      END
+      
+      m_nNbSlides = nNbSlides
+     type : 458752
+   -
+     name : NbCharts
+     internal_properties : CAAAAAgAAAC3C1GtwC0mvZhNZ/4b02wMArVlNxY1Odz9sAaPmrN3bK4ba18zCsU+OMJRL73/Oq0jks6UW/B3tY42N3m/1I2soNj6Yz0OL+rXrBHhB6nOgY7nuJvWmE/A3wr6IURQRG3vijj3WY85TnPIIHSz3Id2m33s9i1HGt136v5vTmJogVTMecKASHIzwVAVxWNEbU7mpblM
+     procedure_id : 1905134831230197672
+     type_code : 12
+     code : |1+
+      // Summary: Defines the number of charts found in .PPTX
+      // Syntax:
+      //NbCharts ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      
+      PROCEDURE NbCharts()
+      
+      nNbCharts is int 
+      
+      FOR EACH string sFile of m_sListFiles SEPARATED BY CR
+      	IF Upper(sFile) [= "PPT\CHARTS\CHART" _AND_ Upper(fExtractPath(sFile, fExtension)) =".XML" THEN
+      		nNbCharts++		
+      	END
+      END
+      
+      m_nNbCharts = nNbCharts
+     type : 458752
+   -
+     name : DefineChartData
+     procedure_id : 1905162460755151177
+     type_code : 12
+     code : |1+
+      // Summary: Defines the data of a chart 
+      // Syntax:
+      //DefineChartData (<nChartNumber>, <arrCapSeries>, <arrCapCategories>, <arrData>)
+      //
+      // Parameters:
+      //	nChartNumber: Number of the chart to modify
+      // 	arrCapSeries: Array containing the caption of the series
+      // 	arrCapCategories: Array containing the captions of the categories
+      // 	arrData: Array of chart data
+      // Return value:
+      // 	None
+      
+      PROCEDURE DefineChartData(nChartNumber, arrCapSeries, arrCapCategories, arrData)
+      
+      
+      //No need to continue if the number passed in parameter is not valid
+      IF nChartNumber < 0 OR nChartNumber > m_nNbCharts THEN
+      	Error("The number of the chart passed in parameter is not valid.",
+      	StringBuild("%1 charts are found in the selected PowerPoint template.", m_nNbSlides) )
+      	RETURN
+      END
+      
+      
+      //Create a new Chart object 
+      clNewChart is CChart(object, nChartNumber)
+      
+      //Write into the chart
+      clNewChart.FillChart(arrCapSeries, arrCapCategories, arrData)
+      clNewChart.Write()
+      
+     type : 458752
+   -
+     name : DefineArrayData
+     internal_properties : CAAAAAgAAAA1uACuileJncYDxzEuARkTOXUv9iHV+3ZiyFZqkoRerVqsIXw2zVtpdDphHeXHIAzAzV0C/9nmPEvrqoRRjfI3edMlBpbDP2bxAMK2nHLn+vGBzPmyAtQqLYup/45NhCwsBTwiuR+VUieOJj350VUNj6Yem27UJzfL5h05Ql1VQi5ueFkx8gJ+njg3ywuq9XoUg4U5CGvIvML3XTIVG/3LOtfXSRGEGT/34QY9kcSmnaqNzLf+cpwkYuA8QX9iaWToFPJOcSuXTJw4wal74uYQWkclcuf3YFgOwzetubsKKQ==
+     procedure_id : 1905436110300345910
+     type_code : 12
+     code : |1+
+      // Summary: Used to fill a slide N of the PPTX document from the content of WINDEV controls
+      // Syntax:
+      //DefineArrayData (<nSlideNumber>, <arrData>, <sName>)
+      //
+      // Parameters:
+      //	nSlideNumber: Number of the slide whose content must be filled
+      //	arrData: Title that must be given
+      //	sName: Name of the title as it is in the PPTX template to fill
+      // Return value:
+      // 	None
+      // Automatic process of errors: RETURN FALSE
+      //
+      
+      PROCEDURE DefineArrayData(nSlideNumber,arrData, sName)
+      
+      //No need to continue if the number passed in parameter is not valid
+      IF nSlideNumber < 0 OR nSlideNumber > m_nNbSlides THEN
+      	Error("The number of the slide to modify passed in parameter is not valid.",
+      	StringBuild("%1 slides are found in the selected PowerPoint template.", m_nNbSlides) )
+      	RETURN
+      END
+      
+      //Create a new Slide object 
+      clNewSlide is CSlide(object, nSlideNumber)
+      
+      //Write into the slide
+      clNewSlide.FillArray(arrData, sName)
+      
+      clNewSlide.Write()
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : CClasse1
+resources :
+ string_res :
+  identifier : 0x1a7022d4004397fd
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

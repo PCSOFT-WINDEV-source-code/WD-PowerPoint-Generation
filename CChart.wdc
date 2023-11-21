@@ -1,0 +1,169 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : CChart
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x1873ce9a011e0c1a
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  internal_properties : CAAAAAgAAABm4PVFe9JAHaoZ7pWrapr167xJBrSdz0axAnnnfYhOQaaZf6aFmw+87+hdnze0968KI3y7g0wMbri74fT3L3UE/39pGg==
+  type_code : 10
+  p_codes :
+   -
+     internal_properties : CAAAAAgAAADZpcU9P8EO/SAYuSq0CF5tPHQmHMvLOOmpImQ6hlnf6YiljdUM6yH/qlEaC9VESWRrfylnfOV6j+A5fSbvt5cEjWHVXcz7lTvRSvZblZMacavQ4WvVMxUcnVYD3XujcqRJhdJwImP/thLUcG9C48Hvlr03aRS9btOoFQcOoYJW1Q==
+     code : |1+
+      CChart is Class
+      	inhérits of CElement
+      	
+      	
+      GLOBAL
+      	CONSTANT 
+      		
+      		//Relative path of a chart .XML in the PPTX archive
+      		//The chart.xml files are named chart1.xml, chart2.xml.. 
+      		CST_RelativeChartPath = "ppt\charts\chart%1.xml" 	
+      		CST_NameXMLDoc = "XMLDoc_Chart%1"
+      	END
+      END
+      
+     type : 131072
+  procedures :
+   -
+     name : Constructor
+     procedure_id : 1761979040071093274
+     type_code : 27
+     code : |1+
+      PROCEDURE Constructor(clDocPPTX, nNumber)
+      
+      //Builds the relative path of the XML file of the chart that will be extracted from the archive (PPTX)
+      //StringBuild(CST_RelativeChartPath, nNumber)
+      
+      //Builds a name of XML document to handle the XML code in memory
+      //StringBuild(CST_NameXMLDoc, nNumber)
+      
+      Constructor CElement(clDocPPTX, StringBuild(CST_RelativeChartPath, nNumber), nNumber, StringBuild(CST_NameXMLDoc, nNumber))
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 1761979040071158810
+     type_code : 28
+     code : |1+
+      PROCEDURE Destructor()
+      
+     type : 655360
+   -
+     name : FillChart
+     internal_properties : CAAAAAgAAADdXikGa3ATK39smGJcnHMMMuTpR8aUpK8r9eJfw+rBLfbIiyh5hKIa00fdc6X0rFsdeY3N9ACzCwyARwYpiJmMU7i56yO+MGntC9tcCugOoUO4lBbWq123RLuJTOmDp9L8f/102AjAD5Ax+XuG8XZnZF5xJbJqQ0SO3e96XWtRdVRe4awUQHuCySSZWMMJKr9z76ehQf/Zbc2G18ClmVvjA1aFDvTr7NI0QsxZG1f/R5CzsIc=
+     procedure_id : 1761979040071224346
+     type_code : 12
+     code : |1+
+      // Summary: Fills a base PowerPoint chart with the data passed in parameter
+      // Syntax:
+      //FillChart (<arrCapSeries>, <arrCapCategories>, <arrData>)
+      //
+      // Parameters:
+      //	arrCapSeries: Array of the captions of series 
+      //	arrCapCategories: Array of captions of categories
+      //	arrData: Array of chart data (2 dimensions: the series then the categories)
+      // Return value:
+      // 	None
+      
+      PROCEDURE FillChart(arrCapSeries, arrCapCategories, arrData)
+      
+      sXPathQuery is string
+      sCaption is string
+      
+      XMLRoot(m_sNameXMLDoc)
+      
+      //Fills the captions of series in the XML code of the chart 
+      FOR i = 1 _TO_ arrCapSeries..Occurrence
+      	
+      	//	<c:ser>
+      	//	<c:idx val="0"/>
+      	//Finds, in the XML code, the series whose "val" = i-1
+      	sXPathQuery = StringBuild("//c:ser[c:idx/@val='%1']" + "/c:tx/c:strRef/c:strCache/c:pt/c:v", i-1)
+      	XMLExecuteXPath(m_sNameXMLDoc, sXPathQuery)
+      	
+      	//Apply the caption if found
+      	IF XMLFound(m_sNameXMLDoc) THEN
+      		sCaption = StringToUTF8(arrCapSeries[i])
+      		XMLModify(m_sNameXMLDoc,sCaption)
+      	END
+      	
+      	//Browse completed, end the search
+      	XMLCancelSearch(m_sNameXMLDoc)
+      	
+      END
+      
+      XMLRoot(m_sNameXMLDoc)
+      
+      //Fills the captions of categories in the XML code of the chart 
+      FOR i = 1 _TO_ arrCapCategories..Occurrence
+      	
+      	//Searches in the XML code for all the locations where the captions of categories are found
+      	//The names of the categories are re-specified for each series
+      	sXPathQuery  = StringBuild("//c:cat/c:strRef/c:strCache/c:pt[@idx='%1']" + "/c:v", i-1)
+      	XMLExecuteXPath(m_sNameXMLDoc, sXPathQuery)
+      	
+      	WHILE XMLFound(m_sNameXMLDoc)
+      		
+      		sCaption = StringToUTF8(arrCapCategories[i])
+      		
+      		//Modify the value of "<c:v>"
+      		XMLModify(m_sNameXMLDoc,sCaption)
+      		
+      		XMLNext(m_sNameXMLDoc)
+      	END
+      	
+      	//Browse completed, end the search
+      	XMLCancelSearch(m_sNameXMLDoc)
+      END
+      
+      
+      XMLRoot(m_sNameXMLDoc)
+      
+      
+      //Fills the data in the XML code of the chart => browses the series
+      FOR i = 1 _TO_ arrCapSeries..Occurrence
+      	
+      	// Browses the categories
+      	FOR j = 1 _TO_ arrCapCategories..Occurrence
+      		//	<c:ser>
+      		//	<c:idx val="0"/>
+      		//Finds, in the XML code, the series whose "val" = i-1
+      		sXPathQuery = StringBuild("//c:ser[c:idx/@val='%1']" + "/c:val/c:numRef/c:numCache/c:pt[@idx='%2']"+ "/c:v", i-1, j-1)
+      		XMLExecuteXPath(m_sNameXMLDoc, sXPathQuery)
+      		
+      		//If found, retrieve the value of the "idx" attribute of the "c:pt" tag for identify the category on which we are positioned
+      		WHILE XMLFound(m_sNameXMLDoc) 
+      			
+      			sCaption = StringToUTF8(arrData[i][j])
+      			
+      			XMLModify(m_sNameXMLDoc,sCaption)
+      			
+      			XMLNext(m_sNameXMLDoc)
+      		END
+      	END
+      	//Browse completed, end the search
+      	XMLCancelSearch(m_sNameXMLDoc)
+      	
+      END
+      
+      
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : CClasse1
+resources :
+ string_res :
+  identifier : 0x1a705a2400a3a78b
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

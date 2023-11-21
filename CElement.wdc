@@ -1,0 +1,134 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : CElement
+ major_version : 28
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x1a705bf300adb7ff
+ internal_properties : CAAAAAgAAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  type_code : 10
+  p_codes :
+   -
+     internal_properties : CAAAAAgAAADd9ByemUuUZycEdQeoLIjVJL7cGl/9aUEh4jSaFmlfeVhlPRUMu5EfyiG6e7VkGQSLT+n3rCV6nzB5zcYfR3fUNZmNFVSjXQPJMp7jnSuS2fMoWaNde13ktT6LpYMb6iyRPSqoimvnluot2fJXjtS8s2pmYpSlzp7r7ABFYVdS0Q==
+     code : |1+
+      CElement is Class
+      	
+      	m_nNumber is int 		//Number of the slide or number of the chart
+      	
+      	m_sXMLFileName is string //Relative path of the XML file of the chart in the archive
+      	m_bufSlideContent is buffer //Buffer containing the .xml file extracted in memory (slide or chart for example)
+      	m_sNameXMLDoc is string		//Name of the XML document in memory to handle the XML code of the chart XML file 
+      	
+      	m_pclParentDoc is CDocumentPPTX dynamic  	//Parent PPTX document to which it belongs
+      END
+      
+     type : 131072
+  procedures :
+   -
+     name : Constructor
+     procedure_id : 1905123741624350719
+     type_code : 27
+     code : |1-
+      PROCEDURE Constructor(clDocPPTX, sXMLFileName, nNumber, sDocXML)
+      
+      m_pclParentDoc = clDocPPTX
+      m_sXMLFileName = sXMLFileName
+      m_nNumber = nNumber
+      m_sNameXMLDoc = sDocXML
+      
+      CreateXMLDoc()
+     type : 589824
+   -
+     name : Destructor
+     procedure_id : 1905123741624416255
+     type_code : 28
+     code : |1+
+      PROCEDURE Destructor()
+      
+     type : 655360
+   -
+     name : CreateXMLDoc
+     internal_properties : CAAAAAgAAADxFUZJEsjavlUC3+aVXPWEr2s7eslGGewzVty8nJ9DyRH6ucuVymV7oGcoRGx/+pdJctg2le0zoHHt+zV6l9KJ84o48BrhIxYxKTm+6gOZErz3lb7yNUMg0/BYDLkrRoyEk/4ueV3lb+Me6sve4QBm+xr2C86s/wubNulltpmVbLlxdYR0M7yuKPIrN8vred7dRyzCdfWHxoWsCW7ZBQgRd9lP2uF+LVfvMglDdED0ew==
+     procedure_id : 1905152908747691977
+     type_code : 12
+     code : |1-
+      // Summary: Retrieve in memory the XML code of the slide of the PPTX template (that is a ZIP archive)
+      // Syntax:
+      //CreateXMLDoc ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      // Automatic process of errors: RETURN FALSE
+      //
+      
+      PROCEDURE CreateXMLDoc()
+      
+      sArchiveName is string = "Archive"
+      
+      //Opening the archive
+      zipOpen(sArchiveName,m_pclParentDoc.m_sFilePath)
+      
+      //Extract the XML file from the slide 
+      m_bufSlideContent  = zipExtractFile(sArchiveName,m_sXMLFileName, zipInMemory)	
+      
+      //Close the archive
+      zipClose(sArchiveName)
+      
+      //Create the XML document to be handled in memory
+      XMLDocument(m_sNameXMLDoc, m_bufSlideContent)
+     type : 458752
+   -
+     name : Write
+     internal_properties : CAAAAAgAAABHbqkdKb+vaoFCHyJrnj88FzB5pznlnKScwJpCRxrO9cxPmZCXOXKHI7Nb7E/9X8nUcOT+xTYTLbrruW6IatfmPrZHdIvrjfjTrm6pO3ZuB78RQlzspQ5Z3TIY8fsosAmN2YRYnT/nwDQ/5EIDwAC38yTs8MgEJYSQiy9qRc6HvSGf75dEvXRlQTvB6jx9u58j1JD7hWxbTp6z7N7bMcTv1fSQ39ohtIeVd4+hKroXs4wpxrLJIG4DyXw2gds2O92ERvAAJZtu7iRB3/Q=
+     procedure_id : 1905160875912177456
+     type_code : 12
+     code : |1-
+      // Summary: Actually writing the modification performed into the XML file of the slide
+      // Syntax:
+      //Write ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      // Automatic process of errors: RETURN FALSE
+      //
+      
+      PROCEDURE Write()
+      
+      //Actually write the modifications performed in memory for the slide into the XML file
+      m_bufSlideContent = XMLBuildString(m_sNameXMLDoc)
+      
+      
+      //**************** Update the file in the archive ****************//
+      sArchiveName is string = "Archive"
+      //Opening the archive
+      zipOpen(sArchiveName,m_pclParentDoc.m_sFilePath)
+      //Delete the initial file into the slide
+      zipDeleteFile(sArchiveName, m_sXMLFileName)
+      //Add the new file for the slide
+      zipAddFile(sArchiveName, m_bufSlideContent, zipInMemory, m_sXMLFileName)
+      //Close the archive
+      zipClose(sArchiveName)
+      
+      //Closes the XML document
+      XMLClose(m_sNameXMLDoc)
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : CClasse1
+resources :
+ string_res :
+  identifier : 0x1a705bee00aaa5e6
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ
